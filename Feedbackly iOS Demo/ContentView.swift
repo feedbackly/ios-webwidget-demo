@@ -13,24 +13,28 @@ struct ContentView: View {
     @State var error: Error? = nil
     var body: some View {
         NavigationView {
-            WebView(title: $title)
-                .onLoadStatusChanged { loading, error in
-                    if loading {
-                        self.title = "Loading…"
-                    }
-                    else {
-                        if let error = error {
-                            self.error = error
-                            if self.title.isEmpty {
-                                self.title = "Error"
+            // With GeometryReader you can set webview's frame as you wish.
+            GeometryReader { geometry in
+                WebView(title: $title)
+                    .onLoadStatusChanged { loading, error in
+                        if loading {
+                            self.title = "Loading…"
+                        }
+                        else {
+                            if let error = error {
+                                self.error = error
+                                if self.title.isEmpty {
+                                    self.title = "Error"
+                                }
+                            }
+                            else if self.title.isEmpty {
+                                self.title = "Some Place"
                             }
                         }
-                        else if self.title.isEmpty {
-                            self.title = "Some Place"
-                        }
                     }
-                }
-                .navigationBarTitle(title)
+                    .frame(width: geometry.size.width, height: geometry.size.height / 3)
+                    .navigationBarTitle(title)
+            }
         }
         }
 }
@@ -44,7 +48,7 @@ struct WebView: UIViewRepresentable {
     }
 
     func makeUIView(context: Context) -> WKWebView {
-        let view = WKWebView(frame: CGRect( x: 0, y: 0, width: 100, height: 100))
+        let view = WKWebView()
         view.navigationDelegate = context.coordinator
         view.loadFileURL(Bundle.main.url(forResource: "demo", withExtension: "html")!, allowingReadAccessTo: Bundle.main.url(forResource: "demo", withExtension: "html")!)
         return view
